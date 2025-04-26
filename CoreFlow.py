@@ -91,6 +91,8 @@ def hybrid_task():
     sum(range(10**6))  # CPU kısmı
     return "Hibrit işlem tamam"
 
+
+
 async def main():
     print(f"🖥️ Sistem kaynakları: {CPU_COUNT} çekirdek")
     print("🚀 Task'lar işlenmeye başlıyor...\n")
