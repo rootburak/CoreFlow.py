@@ -59,9 +59,8 @@ async def main():
 
 Örnek Proje
 
-git clone https://github.com/kullanici/coreflow-demo.git
-cd coreflow-demo
-python app.py
+git clone https://github.com/rootburak/CoreFlow.py
+python coreFlowSpeedTest.py
 
 Katkı
 
