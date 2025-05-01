@@ -1,61 +1,68 @@
-CoreFlow.py - Advanced Task Orchestration System
+CoreFlow
 
-(Türkçe açıklama aşağıda)
-Technical Description (EN)
+Bu kütüphane, Python ile geliştirilen uygulamalarınızda asenkron iş yüklerinin dinamik biçimde işlenmesini sağlar. Thread ve process havuzları arasında otomatik geçiş yaparak I/O ve CPU yoğun işlemleri en uygun kaynaktan çalıştırır.
 
-A high-performance Python task scheduler with dynamic resource allocation, automatically distributing workloads between ThreadPool (I/O-bound) and ProcessPool (CPU-bound) based on:
+Özellikler
 
-    Real-time system load analysis
+Dinamik Kaynak Yönetimi: Sistemde kullanılabilir çekirdek sayısına göre thread ve process havuzu boyutlarını otomatik ayarlar.
 
-    Hardware capability detection (CPU cores/RAM)
+Esnek Görev Kuyruğu: Görevler, dekoratörler sayesinde tek satırda kuyruğa eklenir ve sonrasında toplu işlenir.
 
-    Adaptive timeout thresholds
+Zaman Aşımı Destekli Dağıtım: I/O ağırlıklı görevler thread havuzunda, zaman aşımında kalanlar otomatik olarak process havuzuna aktarılır.
 
-Teknik Açıklama (TR)
+Basit Kullanım: @async_task ve @async_task_await dekoratörleri ile görev ekleme, bekleme ve sonuç alma kolay.
 
-Python tabanlı akıllı iş yükü dağıtıcısı. Sistem kaynaklarını gerçek zamanlı analiz ederek:
 
-    I/O bağımlı işleri ThreadPool'da
+Kullanım
 
-    CPU yoğun işleri ProcessPool'da
-    otomatik olarak yönetir.
+1. Görevleri Kuyruğa Ekleme
 
-Key Features / Temel Özellikler
-Feature	EN	TR
-Auto-Scaling	Dynamically adjusts worker pools	Çalışan havuzunu otomatik ölçeklendirir
-Smart Task Classification	Detects I/O vs CPU-bound operations	İşlem türünü otomatik tanır
-Queue Optimization	Priority-based task distribution	Öncelikli kuyruk yönetimi
-System Requirements / Sistem Gereksinimleri
-bash
+@async_task dekoratörü ile işaretlenen fonksiyonlar, çağrıldıklarında kuyruğa eklenir:
 
-# EN:  
-- Python 3.8+ (with asyncio support)  
-- 4+ CPU cores recommended  
+from CoreFlow import async_task, async_task_await
 
-# TR:  
-- Python 3.8+ (asyncio desteğiyle)  
-- Önerilen: 4+ işlemci çekirdeği  
+@async_task
+async def io_islemi():
+    await asyncio.sleep(2)
+    return "I/O tamam"
 
-Sample Usage / Örnek Kullanım
-python
+@async_task
+def cpu_islem():
+    return sum(i*i for i in range(10**7))
 
-# EN: Add tasks to queue  
-@task_enqueuer  
-def data_processing():  
-    ...
+2. Kuyruk İşlenip Ardından Kritik Bölge
 
-# TR: Kuyruğa görev ekleme  
-@task_enqueuer  
-def veri_isleme():  
-    ...  
+@async_task_await ile sarılan fonksiyon, çağrıldığında önce kuyruktaki tüm görevleri işler, sonra kendi gövdesini yürütür:
 
-Technical Advantages / Teknik Avantajlar
+@async_task_await
+async def finalize():
+    print("Tüm görevler işlendi, kritik adım başladı.")
+    return "Sonuç"
 
-    EN: Zero external dependencies (Pure Python)
-    TR: Harici bağımlılık yok (Saf Python)
+async def main():
+    await io_islemi()
+    await cpu_islem()
+    sonuc = await finalize()
+    print(sonuc)
 
-    EN: Built-in load balancing
-    TR: Dahili yük dengeleme
+3. Manuel Kuyruk İşleme
 
-    EN: Detailed performance logging
-    TR: Detaylı performans kayıtları
+Dekoratör kullanmadan da kuyruğu doğrudan boşaltabilirsiniz:
+
+from CoreFlow import DynamicResourceManager, process_queue
+
+async def main():
+    # görevleri ekleyin...
+    manager = DynamicResourceManager()
+    results = await process_queue(manager)
+    print(results)
+
+Örnek Proje
+
+git clone https://github.com/kullanici/coreflow-demo.git
+cd coreflow-demo
+python app.py
+
+Katkı
+
+Katkıda bulunmak isterseniz, issue açabilir veya pull request gönderebilirsiniz.
